@@ -81,7 +81,7 @@ func TestCreateTodo_BindingError(t *testing.T) {
 		return
 	}
 
-	// // Periksa status code
+	// Periksa status code
 	// if rec.Code != http.StatusBadRequest {
 	//     t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, rec.Code)
 	// }
@@ -92,47 +92,47 @@ func TestCreateTodo_BindingError(t *testing.T) {
 }
 
 func TestCreateTodo_ServiceError(t *testing.T) {
-    // Persiapkan mock repository
-    mocksRepo := mocks.NewTodoRepository(t)
-    expectedError := errors.New("service error")
+	// Persiapkan mock repository
+	mocksRepo := mocks.NewTodoRepository(t)
+	expectedError := errors.New("service error")
 
-    // Atur mock repository untuk mengembalikan error saat CreateTodo dipanggil
-    mocksRepo.On("CreateTodo", mock.AnythingOfType("*model.Todo")).Return(expectedError).Once()
+	// Atur mock repository untuk mengembalikan error saat CreateTodo dipanggil
+	mocksRepo.On("CreateTodo", mock.AnythingOfType("*model.Todo")).Return(expectedError).Once()
 
-    // Buat request dengan payload yang valid
-    payload := map[string]string{"title": "Test Todo"}
-    payloadBytes, _ := json.Marshal(payload)
-    req := httptest.NewRequest(http.MethodPost, "/todos", bytes.NewReader(payloadBytes))
-    req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-    rec := httptest.NewRecorder()
-    e := echo.New()
-    c := e.NewContext(req, rec)
+	// Buat request dengan payload yang valid
+	payload := map[string]string{"title": "Test Todo"}
+	payloadBytes, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/todos", bytes.NewReader(payloadBytes))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, rec)
 
-    // Buat instance service dan handler
-    todoService := service.NewTodoService(mocksRepo)
-    handler := NewTodoHandler(*todoService)
+	// Buat instance service dan handler
+	todoService := service.NewTodoService(mocksRepo)
+	handler := NewTodoHandler(*todoService)
 
-    // Jalankan handler
-    err := handler.CreateTodo(c)
-    if err == nil {
-        t.Errorf("Expected error, got nil")
-        return
-    }
+	// Jalankan handler
+	err := handler.CreateTodo(c)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+		return
+	}
 
-    // // Periksa status code
-    // if rec.Code != http.StatusInternalServerError {
-    //     t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, rec.Code)
-    // }
+	// // Periksa status code
+	// if rec.Code != http.StatusInternalServerError {
+	//     t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, rec.Code)
+	// }
 
-    // Periksa body response untuk debugging
-    body := rec.Body.String()
-    t.Logf("Response Body: %s", body)
+	// Periksa body response untuk debugging
+	body := rec.Body.String()
+	t.Logf("Response Body: %s", body)
 
-    // Periksa apakah error yang diharapkan dikembalikan
-    var httpError *echo.HTTPError
-    if !errors.As(err, &httpError) {
-        t.Fatalf("Expected echo.HTTPError, got %v", err)
-    }
-    assert.Equal(t, http.StatusInternalServerError, httpError.Code)
-    assert.Contains(t, httpError.Message, expectedError.Error())
+	// Periksa apakah error yang diharapkan dikembalikan
+	var httpError *echo.HTTPError
+	if !errors.As(err, &httpError) {
+		t.Fatalf("Expected echo.HTTPError, got %v", err)
+	}
+	assert.Equal(t, http.StatusInternalServerError, httpError.Code)
+	assert.Contains(t, httpError.Message, expectedError.Error())
 }
